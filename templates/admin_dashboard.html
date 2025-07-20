@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+<p>Welcome, {{ current_user.username }}!</p>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h4>Recent Applications</h4>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>University</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ app[0] }}</td>
+                        <td>{{ app[1] }}</td>
+                        <td>{{ app[2] }}</td>
+                        <td>{{ app[3] }}</td>
+                        <td>{{ app[4] }}</td>
+                        <td>
+                            <span class="badge bg-{% if app[5] == 'approved' %}success{% elif app[5] == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ app[5].title() }}
+                            </span>
+                        </td>
+                        <td>{{ app[6] }}</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary">Review</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

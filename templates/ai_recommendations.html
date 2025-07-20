@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🤖 AI Recommendations & Insights</h2>
+            <div>
+                <span class="badge bg-{% if confidence_score >= 80 %}success{% elif confidence_score >= 60 %}warning{% else %}danger{% endif %} fs-6">
+                    Profile Score: {{ confidence_score|round(1)|default(0) }}/100
+                </span>
+            </div>
+        </div>
+
+        <!-- Overall Assessment -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>📊 Overall Profile Assessment</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="text-{% if recommendations.get('overall_assessment', {}).get('overall_score', 0) >= 80 %}success{% elif recommendations.get('overall_assessment', {}).get('overall_score', 0) >= 60 %}warning{% else %}danger{% endif %}">
+                            {{ recommendations.get('overall_assessment', {}).get('strength_category', 'Unknown') }} Profile
+                        </h4>
+                        <p class="lead">{{ recommendations.get('overall_assessment', {}).get('assessment_message', 'No assessment available') }}</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>Academic Strength</h6>
+                                <div class="progress">
+                                    <div class="progress-bar" data-width="{{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('academic', 0)|default(0, true) }}">
+                                        {{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('academic', 0)|default(0, true) }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Profile Completeness</h6>
+                                <div class="progress">
+                                    <div class="progress-bar" data-width="{{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('completeness', 0)|default(0, true) }}">
+                                        {{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('completeness', 0)|default(0, true) }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Statement Quality</h6>
+                                <div class="progress">
+                                    <div class="progress-bar" data-width="{{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('sop', 0)|default(0, true) }}">
+                                        {{ recommendations.get('overall_assessment', {}).get('component_scores', {}).get('sop', 0)|default(0, true) }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="display-1 text-{% if recommendations.get('overall_assessment', {}).get('overall_score', 0) >= 80 %}success{% elif recommendations.get('overall_assessment', {}).get('overall_score', 0) >= 60 %}warning{% else %}danger{% endif %}">
+                            {{ recommendations.get('overall_assessment', {}).get('overall_score', 0)|default(0)|round(1) }}<small>/100</small>
+                        </div>
+                        <p>Overall Score</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admission Predictions -->
+        {% if recommendations.get('predictions') %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>🎯 Admission Predictions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Overall Admission Chances</h6>
+                        <p class="h4 text-success">{{ recommendations.get('predictions', {}).get('overall_admission_chance', 'Not available') }}</p>
+                        
+                        <h6 class="mt-3">Top-Tier University Chances</h6>
+                        <p class="h5 text-warning">{{ recommendations.get('predictions', {}).get('top_tier_admission_chance', 'Not available') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Key Factors</h6>
+                        <ul>
+                            {% for factor in recommendations.get('predictions', {}).get('key_factors', []) %}
+                            <li>{{ factor }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- University Recommendations -->
+        {% if recommendations.get('university_recommendations') %}
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5>🏫 Recommended Universities</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for match in recommendations.get('university_recommendations', []) %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="card-title">{{ match.get('university', {}).get('name', 'Unknown University') }}</h6>
+                                    <span class="badge bg-{% if match.get('category') == 'reach' %}danger{% elif match.get('category') == 'match' %}success{% else %}secondary{% endif %}">
+                                        {{ match.get('category', 'unknown')|title }}
+                                    </span>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">{{ match.get('university', {}).get('country', 'Unknown') }} • Ranking: {{ match.get('university', {}).get('ranking', 0) }}/100</small><br>
+                                    <small>Acceptance Rate: {{ match.get('university', {}).get('acceptance_rate', 0) }}% • Tuition: ${{ match.get('university', {}).get('tuition', 0)|int }}</small>
+                                </p>
+                                
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" data-width="{{ match.get('match_score', 0)|default(0, true) }}">
+                                        {{ match.get('match_score', 0)|default(0, true) }}% Match
+                                    </div>
+                                </div>
+                                
+                                <ul class="small">
+                                    {% for reason in match.get('match_reasons', []) %}
+                                    <li>{{ reason }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Competitive Analysis -->
+        {% if recommendations.get('competitive_analysis') %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                <h5>📈 Competitive Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Your Position</h6>
+                        <p class="h4">{{ recommendations.get('competitive_analysis', {}).get('competitive_position', 'Not available') }}</p>
+                        <p>{{ recommendations.get('competitive_analysis', {}).get('benchmark_comparison', 'Not available') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Areas of Strength</h6>
+                        <ul class="list-unstyled">
+                            {% for strength in recommendations.get('competitive_analysis', {}).get('areas_of_strength', []) %}
+                            <li><span class="badge bg-success me-2">✓</span>{{ strength }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Improvement Suggestions -->
+        {% if recommendations.get('improvement_suggestions') %}
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5>💡 Personalized Improvement Suggestions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for suggestion in recommendations.get('improvement_suggestions', []) %}
+                    <div class="col-md-6 mb-2">
+                        <div class="alert alert-info" role="alert">
+                            <strong>{{ loop.index }}.</strong> {{ suggestion }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Academic Metrics Detail -->
+        {% if recommendations.get('academic_metrics') %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📚 Academic Performance Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for metric, score in recommendations.get('academic_metrics', {}).items() %}
+                    <div class="col-md-3 mb-3">
+                        <h6>{{ metric.replace('_', ' ')|title }}</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-{% if score|default(0) >= 80 %}success{% elif score|default(0) >= 60 %}warning{% else %}danger{% endif %}" 
+                                 data-width="{{ score|default(0, true) }}">
+                                {{ score|default(0)|round(1) }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Statement of Purpose Analysis -->
+        {% if recommendations.get('sop_analysis', {}).get('word_count', 0) > 0 %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📝 Statement of Purpose Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Word Count</h6>
+                        {% set wc = recommendations.get('sop_analysis', {}).get('word_count', 0) %}
+                        <p class="h4 text-{% if 500 <= wc <= 800 %}success{% elif 300 <= wc <= 1000 %}warning{% else %}danger{% endif %}">
+                            {{ wc }}
+                        </p>
+                    </div>
+                    <div class="col-md-8">
+                        <h6>Key Themes Identified</h6>
+                        {% for theme in recommendations.get('sop_analysis', {}).get('key_themes', [])[:8] %}
+                        <span class="badge bg-secondary me-1">{{ theme }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="text-center">
+            <a href="{{ url_for('view_application_details', app_id=app_id) }}" class="btn btn-secondary">Back to Application</a>
+            <a href="{{ url_for('generate_ai_analysis', app_id=app_id) }}" class="btn btn-primary">🔄 Regenerate Analysis</a>
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary ms-2">Admin Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to handle progress bar widths -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.progress-bar[data-width]').forEach(function(bar) {
+        const width = parseFloat(bar.getAttribute('data-width')) || 0;
+        bar.style.width = width + '%';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>✏️ Edit Application</h2>
+            <div>
+                <span class="badge bg-warning">Pending - Editable</span>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Note:</strong> You can edit your application and add/remove documents while it's in "Pending" status. 
+            Once reviewed by admin, editing will be disabled.
+        </div>
+        
+        <form method="POST" action="{{ url_for('update_application', app_id=app_id) }}" enctype="multipart/form-data">
+            <!-- Personal Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="full_name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" name="full_name" value="{{ application.full_name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" name="email" value="{{ application.email }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ application.phone or '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" name="date_of_birth" value="{{ application.date_of_birth or '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="nationality" class="form-label">Nationality</label>
+                                <input type="text" class="form-control" name="nationality" value="{{ application.nationality or '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Academic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="target_university" class="form-label">Target University *</label>
+                                <input type="text" class="form-control" name="target_university" value="{{ application.target_university }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="course" class="form-label">Intended Course/Program *</label>
+                                <input type="text" class="form-control" name="course" value="{{ application.course }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="academic_level" class="form-label">Academic Level</label>
+                                <select class="form-control" name="academic_level">
+                                    <option value="">Select Level</option>
+                                    <option value="undergraduate" {% if application.academic_level == 'undergraduate' %}selected{% endif %}>Undergraduate</option>
+                                    <option value="masters" {% if application.academic_level == 'masters' %}selected{% endif %}>Master's</option>
+                                    <option value="phd" {% if application.academic_level == 'phd' %}selected{% endif %}>PhD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="gpa" class="form-label">GPA/CGPA</label>
+                                <input type="number" step="0.01" class="form-control" name="gpa" value="{{ application.gpa or '' }}" min="0" max="4">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="gre_score" class="form-label">GRE Score</label>
+                                <input type="number" class="form-control" name="gre_score" value="{{ application.gre_score or '' }}" min="260" max="340">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="toefl_score" class="form-label">TOEFL Score</label>
+                                <input type="number" class="form-control" name="toefl_score" value="{{ application.toefl_score or '' }}" min="0" max="120">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="ielts_score" class="form-label">IELTS Score</label>
+                                <input type="number" step="0.5" class="form-control" name="ielts_score" value="{{ application.ielts_score or '' }}" min="0" max="9">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience and Essays -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Experience and Essays</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="work_experience" class="form-label">Work Experience (Optional)</label>
+                        <textarea class="form-control" name="work_experience" rows="3" placeholder="Describe your relevant work experience...">{{ application.work_experience or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statement_of_purpose" class="form-label">Statement of Purpose</label>
+                        <textarea class="form-control" name="statement_of_purpose" rows="6" placeholder="Write your statement of purpose...">{{ application.statement_of_purpose or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Documents -->
+            {% if documents %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>📄 Current Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Document Type</th>
+                                    <th>Filename</th>
+                                    <th>Size</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                <tr>
+                                    <td>{{ doc[1].replace('_', ' ').title() }}</td>
+                                    <td>{{ doc[2] }}</td>
+                                    <td>{{ "%.1f KB"|format(doc[3]/1024) }}</td>
+                                    <td>{{ doc[4] }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm delete-doc-btn" 
+                                                data-doc-id="{{ doc[0] }}" 
+                                                data-filename="{{ doc[2] }}">
+                                            🗑️ Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Add New Documents -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>📎 Add New Documents</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Upload additional documents (PDF, DOC, DOCX, JPG, PNG formats accepted, max 16MB each)</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="transcript" class="form-label">Academic Transcripts</label>
+                                <input type="file" class="form-control" name="transcript[]" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sop" class="form-label">Statement of Purpose (Document)</label>
+                                <input type="file" class="form-control" name="sop[]" multiple accept=".pdf,.doc,.docx">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="resume" class="form-label">Resume/CV</label>
+                                <input type="file" class="form-control" name="resume[]" multiple accept=".pdf,.doc,.docx">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="passport" class="form-label">Passport Copy</label>
+                                <input type="file" class="form-control" name="passport[]" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="test_scores" class="form-label">Test Scores (GRE/TOEFL/IELTS)</label>
+                                <input type="file" class="form-control" name="test_scores[]" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="recommendation_letters" class="form-label">Recommendation Letters</label>
+                                <input type="file" class="form-control" name="recommendation_letters[]" multiple accept=".pdf,.doc,.docx">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-success btn-lg">💾 Update Application</button>
+                <a href="{{ url_for('view_application_details', app_id=app_id) }}" class="btn btn-secondary btn-lg ms-3">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Document Confirmation Modal -->
+<div class="modal fade" id="deleteDocModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="delete-filename"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="delete-form" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Document</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Document Deletion -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-doc-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const docId = this.getAttribute('data-doc-id');
+            const filename = this.getAttribute('data-filename');
+            
+            document.getElementById('delete-filename').textContent = filename;
+            document.getElementById('delete-form').action = '/document/' + docId + '/delete';
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteDocModal'));
+            modal.show();
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📢 Send Bulk Notification</h2>
+            <a href="{{ url_for('enhanced_admin_dashboard') }}" class="btn btn-outline-secondary">← Back</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Notification Title</label>
+                        <input type="text" name="title" id="title" class="form-control" required placeholder="Enter notification title...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea name="message" id="message" class="form-control" rows="5" required placeholder="Enter your message here..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="recipient_type" class="form-label">Send To</label>
+                        <select name="recipient_type" id="recipient_type" class="form-select" required>
+                            <option value="">Select Recipients</option>
+                            <option value="all">All Users</option>
+                            <option value="students">Students Only</option>
+                            <option value="admins">Administrators Only</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="send_email" id="send_email" class="form-check-input">
+                            <label for="send_email" class="form-check-label">Also send via email</label>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">📤 Send Notification</button>
+                        <button type="reset" class="btn btn-outline-secondary">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>📋 Preview</h5>
+            </div>
+            <div class="card-body">
+                <div id="preview-content">
+                    <p class="text-muted">Fill out the form above to see a preview of your notification.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const messageInput = document.getElementById('message');
+    const recipientSelect = document.getElementById('recipient_type');
+    const previewContent = document.getElementById('preview-content');
+
+    function updatePreview() {
+        const title = titleInput.value || 'Notification Title';
+        const message = messageInput.value || 'Your notification message will appear here...';
+        const recipient = recipientSelect.value || 'selected users';
+
+        previewContent.innerHTML = `
+            <div class="alert alert-info">
+                <h6>${title}</h6>
+                <p>${message}</p>
+                <small class="text-muted">This will be sent to: ${recipient === 'all' ? 'all users' : recipient}</small>
+            </div>
+        `;
+    }
+
+    titleInput.addEventListener('input', updatePreview);
+    messageInput.addEventListener('input', updatePreview);
+    recipientSelect.addEventListener('change', updatePreview);
+});
+</script>
+{% endblock %}

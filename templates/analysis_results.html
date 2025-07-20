@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 Document Analysis Results</h2>
+            <div>
+                <span class="badge bg-{% if confidence_score >= 80 %}success{% elif confidence_score >= 60 %}warning{% else %}danger{% endif %} fs-6">
+                    Confidence: {{ confidence_score|round(1) }}%
+                </span>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>📋 Analysis Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6>Documents Processed</h6>
+                        <p class="h4">{{ analysis.summary.successfully_processed }}/{{ analysis.summary.total_documents }}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Overall Confidence</h6>
+                        <p class="h4">{{ confidence_score|round(1) }}%</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Red Flags</h6>
+                        <p class="h4 text-danger">{{ analysis.summary.red_flags|length }}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Analysis Date</h6>
+                        <p>{{ analysis_date }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Red Flags -->
+        {% if analysis.summary.red_flags %}
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5>⚠️ Issues Found</h5>
+            </div>
+            <div class="card-body">
+                {% for flag in analysis.summary.red_flags %}
+                <div class="alert alert-danger" role="alert">
+                    {{ flag }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recommendations -->
+        {% if analysis.summary.recommendations %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>💡 Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% for recommendation in analysis.summary.recommendations %}
+                <div class="alert alert-info" role="alert">
+                    {{ recommendation }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Verification Results -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>🔍 Verification Results</h5>
+            </div>
+            <div class="card-body">
+                <!-- Matches -->
+                {% if analysis.overall_verification.matches %}
+                <h6 class="text-success">✅ Verified Information</h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Form Data</th>
+                                <th>Document Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field, details in analysis.overall_verification.matches.items() %}
+                            <tr>
+                                <td>{{ field.replace('_', ' ').title() }}</td>
+                                <td>{{ details.form }}</td>
+                                <td>{{ details.document }}</td>
+                                <td><span class="badge bg-success">{{ details.status.replace('_', ' ').title() }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Discrepancies -->
+                {% if analysis.overall_verification.discrepancies %}
+                <h6 class="text-danger">❌ Discrepancies Found</h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Form Data</th>
+                                <th>Document Data</th>
+                                <th>Issue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field, details in analysis.overall_verification.discrepancies.items() %}
+                            <tr>
+                                <td>{{ field.replace('_', ' ').title() }}</td>
+                                <td>{{ details.form }}</td>
+                                <td>{{ details.document }}</td>
+                                <td><span class="badge bg-danger">{{ details.issue.replace('_', ' ').title() }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Missing Data -->
+                {% if analysis.overall_verification.missing_in_document %}
+                <h6 class="text-warning">⚠️ Data Not Found in Documents</h6>
+                <div class="mb-3">
+                    {% for field, value in analysis.overall_verification.missing_in_document.items() %}
+                    <span class="badge bg-warning me-2">{{ field.replace('_', ' ').title() }}: {{ value }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Individual Document Analysis -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📄 Individual Document Analysis</h5>
+            </div>
+            <div class="card-body">
+                {% for doc_type, doc_analysis in analysis.individual_analyses.items() %}
+                <div class="mb-3">
+                    <h6>{{ doc_type.replace('_', ' ').title() }}</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>File:</strong> {{ doc_analysis.filename }}</p>
+                            <p><strong>Processing:</strong> 
+                                {% if doc_analysis.extraction_success %}
+                                    <span class="badge bg-success">✅ Success</span>
+                                {% else %}
+                                    <span class="badge bg-danger">❌ Failed</span>
+                                {% endif %}
+                            </p>
+                            {% if doc_analysis.extracted_data %}
+                            <p><strong>Data Found:</strong> 
+                                {% for key in doc_analysis.extracted_data.keys() %}
+                                    <span class="badge bg-info me-1">{{ key }}</span>
+                                {% endfor %}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if doc_analysis.extracted_text %}
+                            <p><strong>Text Preview:</strong></p>
+                            <small class="text-muted">{{ doc_analysis.extracted_text[:200] }}...</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center">
+            <a href="{{ url_for('view_application_details', app_id=app_id) }}" class="btn btn-secondary">Back to Application</a>
+            <a href="{{ url_for('analyze_application', app_id=app_id) }}" class="btn btn-primary">🔄 Re-analyze Documents</a>
+            {% if current_user.role == 'admin' %}
+                <button class="btn btn-success ms-2" onclick="approveApplication()">✅ Approve</button>
+                <button class="btn btn-danger ms-2" onclick="rejectApplication()">❌ Reject</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function approveApplication() {
+    if(confirm('Are you sure you want to approve this application?')) {
+        alert('Application approved! (Feature coming soon)');
+    }
+}
+
+function rejectApplication() {
+    if(confirm('Are you sure you want to reject this application?')) {
+        alert('Application rejected! (Feature coming soon)');
+    }
+}
+</script>
+{% endblock %}

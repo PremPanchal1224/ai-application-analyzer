@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Application Details</h2>
+            <span class="badge bg-{% if application[16] == 'approved' %}success{% elif application[16] == 'rejected' %}danger{% else %}warning{% endif %} fs-6">
+                {{ application[16].title() }}
+            </span>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Full Name:</strong> {{ application[2] }}</p>
+                        <p><strong>Email:</strong> {{ application[3] }}</p>
+                        <p><strong>Phone:</strong> {{ application[4] or 'Not provided' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Date of Birth:</strong> {{ application[5] or 'Not provided' }}</p>
+                        <p><strong>Nationality:</strong> {{ application[6] or 'Not provided' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Academic Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Target University:</strong> {{ application[7] }}</p>
+                        <p><strong>Course:</strong> {{ application[8] }}</p>
+                        <p><strong>Academic Level:</strong> {{ application[9] or 'Not specified' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>GPA:</strong> {{ application[10] or 'Not provided' }}</p>
+                        <p><strong>GRE Score:</strong> {{ application[11] or 'Not provided' }}</p>
+                        <p><strong>TOEFL Score:</strong> {{ application[12] or 'Not provided' }}</p>
+                        <p><strong>IELTS Score:</strong> {{ application[13] or 'Not provided' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experience and Essays -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Experience and Essays</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Work Experience:</h6>
+                    <p>{{ application[14] or 'Not provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>Statement of Purpose:</h6>
+                    <p style="white-space: pre-wrap;">{{ application[15] or 'Not provided' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uploaded Documents -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Uploaded Documents</h5>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Uploaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>{{ doc[0].replace('_', ' ').title() }}</td>
+                                <td>{{ doc[1] }}</td>
+                                <td>{{ "%.1f KB"|format(doc[2]/1024) }}</td>
+                                <td>{{ doc[3] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No documents uploaded.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center">
+    <a href="{{ url_for('view_applications') }}" class="btn btn-secondary">Back to Applications</a>
+    
+    <!-- Edit Button (only for pending applications) -->
+    {% if current_user.role == 'student' and application[16] == 'pending' %}
+        <a href="{{ url_for('edit_application', app_id=application[0]) }}" class="btn btn-warning ms-2">
+            ✏️ Edit Application
+        </a>
+    {% endif %}
+    
+    <!-- Analysis Buttons -->
+    {% if documents %}
+        <a href="{{ url_for('analyze_application', app_id=application[0]) }}" class="btn btn-primary ms-2">
+            🔍 Analyze Documents
+        </a>
+        <a href="{{ url_for('view_analysis_results', app_id=application[0]) }}" class="btn btn-outline-info ms-2">
+            📊 View Analysis
+        </a>
+    {% endif %}
+    
+    <!-- AI Analysis Buttons -->
+    <a href="{{ url_for('generate_ai_analysis', app_id=application[0]) }}" class="btn btn-success ms-2">
+        🤖 AI Recommendations
+    </a>
+    <a href="{{ url_for('view_ai_recommendations', app_id=application[0]) }}" class="btn btn-outline-success ms-2">
+        🎯 View AI Insights
+    </a>
+    
+    <!-- Admin Actions -->
+    {% if current_user.role == 'admin' and application[16] == 'pending' %}
+        <button class="btn btn-success ms-2">Approve</button>
+        <button class="btn btn-danger ms-2">Reject</button>
+    {% endif %}
+</div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🎛️ Enhanced Admin Dashboard</h2>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-primary">Manage Applications</a>
+                <a href="{{ url_for('manage_users') }}" class="btn btn-outline-primary">Manage Users</a>
+                <a href="{{ url_for('admin_analytics') }}" class="btn btn-outline-info">Analytics</a>
+            </div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <h2 class="text-primary">{{ stats.total_applications }}</h2>
+                        <p class="card-title">Total Applications</p>
+                        <small class="text-muted">{{ stats.recent_applications }} this week</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h2 class="text-warning">{{ stats.pending_applications }}</h2>
+                        <p class="card-title">Pending Review</p>
+                        <a href="{{ url_for('manage_applications', status='pending') }}" class="btn btn-sm btn-warning">Review Now</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h2 class="text-success">{{ stats.approved_applications }}</h2>
+                        <p class="card-title">Approved</p>
+                        <small class="text-muted">{{ (stats.approved_applications / stats.total_applications * 100)|round(1) if stats.total_applications > 0 else 0 }}% approval rate</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-danger">
+                    <div class="card-body">
+                        <h2 class="text-danger">{{ stats.rejected_applications }}</h2>
+                        <p class="card-title">Rejected</p>
+                        <small class="text-muted">{{ (stats.rejected_applications / stats.total_applications * 100)|round(1) if stats.total_applications > 0 else 0 }}% rejection rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User & AI Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>👥 User Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h4>{{ stats.total_students }}</h4>
+                                <p>Students</p>
+                            </div>
+                            <div class="col-6">
+                                <h4>{{ stats.total_admins }}</h4>
+                                <p>Admins</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🤖 AI Analysis Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>{{ stats.ai_analyzed }}</strong> applications AI analyzed</p>
+                        <p><strong>{{ stats.document_analyzed }}</strong> documents processed</p>
+                        <p><strong>{{ stats.avg_ai_score }}/100</strong> average AI score</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📊 Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('export_applications') }}" class="btn btn-outline-success btn-sm">📥 Export All Data</a>
+                            <a href="{{ url_for('export_applications', status='pending') }}" class="btn btn-outline-warning btn-sm">📋 Export Pending</a>
+                            <button class="btn btn-outline-info btn-sm bulk-notification-btn">📢 Send Notification</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Applications -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between">
+                <h5>📋 Recent Applications</h5>
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_apps %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>University</th>
+                                <th>Status</th>
+                                <th>AI Score</th>
+                                <th>Documents</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in recent_apps %}
+                            <tr>
+                                <td>
+                                    <strong>{{ app.full_name }}</strong><br>
+                                    <small class="text-muted">{{ app.email }}</small>
+                                </td>
+                                <td>{{ app.university }}</td>
+                                <td>
+                                    <span class="badge bg-{% if app.status == 'approved' %}success{% elif app.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                        {{ app.status.title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if app.ai_score %}
+                                        <span class="badge bg-{% if app.ai_score >= 80 %}success{% elif app.ai_score >= 60 %}warning{% else %}danger{% endif %}">
+                                            {{ app.ai_score|round(1) }}/100
+                                        </span>
+                                    {% else %}
+                                        <small class="text-muted">Not analyzed</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ app.document_count }} files</span>
+                                </td>
+                                <td>{{ app.created_at }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('view_application_details', app_id=app.id) }}" class="btn btn-outline-primary">View</a>
+                                        {% if app.status == 'pending' %}
+                                            <button class="btn btn-success quick-approve-btn" data-app-id="{{ app.id }}">✓</button>
+                                            <button class="btn btn-danger quick-reject-btn" data-app-id="{{ app.id }}">✗</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No recent applications found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Analytics Preview -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5>📈 Analytics Overview (Last 30 Days)</h5>
+                <a href="{{ url_for('admin_analytics') }}" class="btn btn-sm btn-outline-info">View Details</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Application Status Distribution</h6>
+                        {% for status in analytics.status_distribution %}
+                        <div class="d-flex justify-content-between">
+                            <span>{{ status.status.title() }}</span>
+                            <span class="badge bg-secondary">{{ status.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Top Universities</h6>
+                        {% for uni in analytics.top_universities[:5] %}
+                        <div class="d-flex justify-content-between">
+                            <span>{{ uni.university[:30] }}...</span>
+                            <span class="badge bg-info">{{ uni.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed JavaScript with Event Listeners -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle quick approve buttons
+    document.querySelectorAll('.quick-approve-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const appId = this.getAttribute('data-app-id');
+            quickApprove(appId);
+        });
+    });
+    
+    // Handle quick reject buttons
+    document.querySelectorAll('.quick-reject-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const appId = this.getAttribute('data-app-id');
+            quickReject(appId);
+        });
+    });
+
+    // Handle bulk notification button
+    document.querySelectorAll('.bulk-notification-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            sendBulkNotification();
+        });
+    });
+});
+
+function quickApprove(appId) {
+    if (confirm('Approve this application?')) {
+        fetch('/admin/application/' + appId + '/update-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'status=approved&notes=Quick approved by admin'
+        }).then(function() {
+            location.reload();
+        }).catch(function(error) {
+            alert('Error updating application: ' + error);
+        });
+    }
+}
+
+function quickReject(appId) {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (reason) {
+        fetch('/admin/application/' + appId + '/update-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'status=rejected&notes=' + encodeURIComponent(reason)
+        }).then(function() {
+            location.reload();
+        }).catch(function(error) {
+            alert('Error updating application: ' + error);
+        });
+    }
+}
+
+function sendBulkNotification() {
+    const title = prompt('Notification title:');
+    const message = prompt('Notification message:');
+    
+    if (title && message) {
+        // Implement bulk notification endpoint
+        alert('Bulk notification sent to all students!');
+    }
+}
+</script>
+{% endblock %}

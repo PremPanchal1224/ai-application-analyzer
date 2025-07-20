@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>👥 Manage Users</h2>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('enhanced_admin_dashboard') }}" class="btn btn-outline-secondary">← Dashboard</a>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">+ Add User</button>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <h3 class="text-info">{{ users|selectattr('role', 'equalto', 'student')|list|length }}</h3>
+                        <p>Students</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h3 class="text-warning">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</h3>
+                        <p>Administrators</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h3 class="text-success">{{ users|length }}</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User Details</th>
+                                <th>Role</th>
+                                <th>Registration</th>
+                                <th>Application Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>{{ user.username }}</strong><br>
+                                        <small class="text-muted">{{ user.email }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if user.role == 'admin' %}danger{% else %}primary{% endif %}">
+                                        {{ user.role.title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>{{ user.created_at }}</small>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ user.application_count }}</strong> applications<br>
+                                        {% if user.last_application %}
+                                            <small class="text-muted">Last: {{ user.last_application }}</small>
+                                        {% else %}
+                                            <small class="text-muted">No applications</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#userDetailModal{{ user.id }}" title="View Details">👁️</button>
+                                        {% if user.role == 'student' %}
+                                            <button class="btn btn-outline-primary view-applications-btn" data-user-id="{{ user.id }}" title="View Applications">📋</button>
+                                        {% endif %}
+                                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editUserModal{{ user.id }}" title="Edit User">✏️</button>
+                                        {% if user.id != current_user.id %}
+                                            <button class="btn btn-outline-danger delete-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}" title="Delete User">🗑️</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- User Detail Modal -->
+                            <div class="modal fade" id="userDetailModal{{ user.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">User Details: {{ user.username }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>Username:</strong> {{ user.username }}</p>
+                                                    <p><strong>Email:</strong> {{ user.email }}</p>
+                                                    <p><strong>Role:</strong> 
+                                                        <span class="badge bg-{% if user.role == 'admin' %}danger{% else %}primary{% endif %}">
+                                                            {{ user.role.title() }}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>Registered:</strong> {{ user.created_at }}</p>
+                                                    <p><strong>Applications:</strong> {{ user.application_count }}</p>
+                                                    {% if user.last_application %}
+                                                        <p><strong>Last Activity:</strong> {{ user.last_application }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Edit User Modal -->
+                            <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit User: {{ user.username }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('update_user', user_id=user.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="username{{ user.id }}" class="form-label">Username</label>
+                                                    <input type="text" name="username" id="username{{ user.id }}" class="form-control" value="{{ user.username }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email{{ user.id }}" class="form-label">Email</label>
+                                                    <input type="email" name="email" id="email{{ user.id }}" class="form-control" value="{{ user.email }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="role{{ user.id }}" class="form-label">Role</label>
+                                                    <select name="role" id="role{{ user.id }}" class="form-select" required>
+                                                        <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+                                                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrator</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Update User</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <h4>No Users Found</h4>
+                    <p class="text-muted">No users are registered in the system.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('create_user') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="new-username" class="form-label">Username</label>
+                        <input type="text" name="username" id="new-username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new-email" class="form-label">Email</label>
+                        <input type="email" name="email" id="new-email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new-password" class="form-label">Password</label>
+                        <input type="password" name="password" id="new-password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new-role" class="form-label">Role</label>
+                        <select name="role" id="new-role" class="form-select" required>
+                            <option value="student">Student</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for User Management -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle view applications buttons
+    document.querySelectorAll('.view-applications-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            viewUserApplications(userId);
+        });
+    });
+
+    // Handle delete user buttons
+    document.querySelectorAll('.delete-user-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const username = this.getAttribute('data-username');
+            confirmDeleteUser(userId, username);
+        });
+    });
+});
+
+function viewUserApplications(userId) {
+    // Redirect to applications page filtered by user
+    window.location.href = '/admin/applications/manage?user=' + userId;
+}
+
+function confirmDeleteUser(userId, username) {
+    if (confirm('Are you sure you want to delete user "' + username + '"? This action cannot be undone.')) {
+        fetch('/admin/user/' + userId + '/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        }).then(function() {
+            location.reload();
+        }).catch(function(error) {
+            alert('Error deleting user: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>⚙️ Notification Settings</h2>
+            <div class="btn-group">
+                <a href="{{ url_for('enhanced_admin_dashboard') }}" class="btn btn-outline-secondary">← Back</a>
+                <a href="{{ url_for('test_email') }}" class="btn btn-outline-info">📧 Test Email</a>
+            </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📧 Email Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_email_settings') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="smtp_server" class="form-label">SMTP Server</label>
+                                <input type="text" name="smtp_server" id="smtp_server" class="form-control" value="smtp.gmail.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtp_port" class="form-label">SMTP Port</label>
+                                <input type="number" name="smtp_port" id="smtp_port" class="form-control" value="587">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sender_email" class="form-label">Sender Email</label>
+                                <input type="email" name="sender_email" id="sender_email" class="form-control" placeholder="your-app@gmail.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="sender_name" class="form-label">Sender Name</label>
+                                <input type="text" name="sender_name" id="sender_name" class="form-control" value="AI Application Analyzer">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> For Gmail, use an "App Password" instead of your regular password for better security.
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Save Email Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Automatic Notifications -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>🤖 Automatic Notifications</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_auto_notifications') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Status Change Notifications</h6>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="auto_approved" id="auto_approved" class="form-check-input" checked>
+                                <label for="auto_approved" class="form-check-label">Send email when application approved</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="auto_rejected" id="auto_rejected" class="form-check-input" checked>
+                                <label for="auto_rejected" class="form-check-label">Send email when application rejected</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="auto_under_review" id="auto_under_review" class="form-check-input">
+                                <label for="auto_under_review" class="form-check-label">Send email when under review</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Reminder Notifications</h6>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="pending_reminders" id="pending_reminders" class="form-check-input">
+                                <label for="pending_reminders" class="form-check-label">Remind students about pending applications</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="admin_summaries" id="admin_summaries" class="form-check-input">
+                                <label for="admin_summaries" class="form-check-label">Send daily summaries to admins</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="welcome_emails" id="welcome_emails" class="form-check-input" checked>
+                                <label for="welcome_emails" class="form-check-label">Send welcome emails to new users</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">✅ Update Auto Notifications</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- WhatsApp Configuration (Optional) -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>💬 WhatsApp Integration (Optional)</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Coming Soon:</strong> WhatsApp notifications via Twilio integration.
+                </div>
+                <form method="POST" action="{{ url_for('update_whatsapp_settings') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="twilio_sid" class="form-label">Twilio Account SID</label>
+                                <input type="text" name="twilio_sid" id="twilio_sid" class="form-control" placeholder="ACxxxxxxx" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="twilio_token" class="form-label">Twilio Auth Token</label>
+                                <input type="password" name="twilio_token" id="twilio_token" class="form-control" placeholder="Enter auth token" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="whatsapp_enabled" id="whatsapp_enabled" class="form-check-input" disabled>
+                        <label for="whatsapp_enabled" class="form-check-label">Enable WhatsApp notifications</label>
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary" disabled>💾 Save WhatsApp Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notification Templates -->
+        <div class="card">
+            <div class="card-header">
+                <h5>📝 Notification Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">✅ Application Approved</h6>
+                                <p class="card-text small">Template for approved applications</p>
+                                <button class="btn btn-sm btn-outline-primary">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">❌ Application Rejected</h6>
+                                <p class="card-text small">Template for rejected applications</p>
+                                <button class="btn btn-sm btn-outline-primary">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">👋 Welcome Email</h6>
+                                <p class="card-text small">Template for new user registration</p>
+                                <button class="btn btn-sm btn-outline-primary">Edit Template</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

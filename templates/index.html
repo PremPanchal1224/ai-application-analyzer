@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto text-center">
+        <h1 class="display-4">AI Application Analyzer</h1>
+        <p class="lead">Streamline your study abroad applications with AI-powered verification and recommendations.</p>
+        
+        {% if not current_user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+            </div>
+        {% else %}
+            <div class="mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            </div>
+        {% endif %}
+        
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <h5>Smart Verification</h5>
+                <p>AI-powered document verification against application forms</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Profile Analysis</h5>
+                <p>Get personalized recommendations for your academic profile</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Admin Dashboard</h5>
+                <p>Comprehensive review and approval system for counselors</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

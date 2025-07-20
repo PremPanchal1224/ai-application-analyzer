@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🔔 Notifications</h2>
+            <button class="btn btn-outline-secondary btn-sm mark-all-read-btn">Mark All Read</button>
+        </div>
+
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="card mb-3 {% if not notification.is_read %}border-primary{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title">
+                                {{ notification.title }}
+                                {% if not notification.is_read %}
+                                    <span class="badge bg-primary ms-2">New</span>
+                                {% endif %}
+                            </h6>
+                            <p class="card-text">{{ notification.message }}</p>
+                            <small class="text-muted">
+                                <span class="badge bg-{{ 'info' if notification.type == 'info' else 'warning' if notification.type == 'status_update' else 'secondary' }}">
+                                    {{ notification.type.replace('_', ' ').title() }}
+                                </span>
+                                • {{ notification.created_at }}
+                            </small>
+                        </div>
+                        {% if not notification.is_read %}
+                        <button class="btn btn-sm btn-outline-primary mark-read-btn" data-notification-id="{{ notification.id }}">
+                            Mark Read
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="display-1">🔔</i>
+                </div>
+                <h4>No Notifications</h4>
+                <p class="text-muted">You're all caught up! No new notifications at this time.</p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">← Back to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript for Notifications -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark individual notification as read
+    document.querySelectorAll('.mark-read-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const notificationId = this.getAttribute('data-notification-id');
+            markNotificationRead(notificationId);
+        });
+    });
+
+    // Mark all notifications as read
+    document.querySelector('.mark-all-read-btn').addEventListener('click', function() {
+        if (confirm('Mark all notifications as read?')) {
+            const unreadNotifications = document.querySelectorAll('.mark-read-btn');
+            unreadNotifications.forEach(function(button) {
+                const notificationId = button.getAttribute('data-notification-id');
+                markNotificationRead(notificationId, false); // Don't reload for each
+            });
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        }
+    });
+});
+
+function markNotificationRead(notificationId, reload = true) {
+    fetch('/notification/' + notificationId + '/read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    }).then(function() {
+        if (reload) {
+            location.reload();
+        }
+    }).catch(function(error) {
+        console.error('Error marking notification as read:', error);
+    });
+}
+</script>
+{% endblock %}
