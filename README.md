@@ -72,4 +72,4 @@ python app.py
 2. Install to default location (`C:\Program Files\Tesseract-OCR\`)
 3. Add to system PATH or the application will auto-detect
 
-**macOS:**
+
