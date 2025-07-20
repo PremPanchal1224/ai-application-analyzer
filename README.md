@@ -43,15 +43,29 @@ An intelligent web application that helps students analyze and improve their stu
 - **File Processing:** Werkzeug, Pillow
 - **Email:** SMTP integration with HTML templates
 
-## 📋 Prerequisites
+Complete Setup Commands 
 
-Before you begin, ensure you have the following installed:
+# 1. Clone the repository
+git clone https://github.com/PremPanchal1224/ai-application-analyzer.git
 
-- **Python 3.8 or higher**
-- **Tesseract OCR** (for document text extraction)
-- **Git** (for cloning the repository)
+# 2. Navigate to project directory
+cd ai-application-analyzer
 
-### Installing Tesseract OCR:
+# 3. Create virtual environment
+python -m venv venv
+
+# 4. Activate virtual environment (Windows)
+venv\Scripts\activate
+
+# 5. Install Python dependencies
+pip install -r requirements.txt
+
+# 6. Download spaCy language model
+python -m spacy download en_core_web_sm
+
+# 7. Run the application
+python app.py
+
 
 **Windows:**
 1. Download from [GitHub Tesseract Releases](https://github.com/UB-Mannheim/tesseract/wiki)
